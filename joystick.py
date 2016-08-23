@@ -1,33 +1,32 @@
 import serial
-from multiprocessing import Process, Array
 
 class Joystick:
     def __init__(self, port='/dev/ttyACM0', baud=9600):
-        ser = serial.Serial(port=port, baudrate=baud)
-        self.state = Array('i', [0,0,0])
-        p = Process(target=self._busyLoop, args=(ser, self.state))
-        p.start()
+        self.ser = serial.Serial(port=port, baudrate=baud)
+        self.state = [0,0,0]
         return
 
-    def _busyLoop(self, ser, data):
-        while True:
-            line = ser.readline()
-            print line
-            tmp = line[:-2].split(',')
-            data[0] = int(tmp[0])
-            data[1] = int(tmp[1])
-            data[2] = int(tmp[2])
-        return
+    def _updateState(self):
+        self.ser.write('1') #It should only write one byte!
+        line = self.ser.readline()
+        self.state = map(int,line[:-2].split(','))
+
+    def getState(self):
+        self._updateState()
+        return self.state
 
     def getCoords(self):
+        self._updateState()
         x = self.state[0]
         y = self.state[1]
         return x,y
 
     def getButtonState(self):
+        self._updateState()
         sel = self.state[2]
         return sel
 
 if __name__ == '__main__':
-    joy = Joystick('/dev/ttyACM1')
-    #print joy.getCoords()
+    joy = Joystick('/dev/ttyACM0')
+    while True:
+        print joy.getState()
