@@ -12,8 +12,8 @@ class Joystick:
     def _busyLoop(self, ser, data):
         while True:
             line = ser.readline()
+            print line
             tmp = line[:-2].split(',')
-            print tmp
             data[0] = int(tmp[0])
             data[1] = int(tmp[1])
             data[2] = int(tmp[2])
@@ -29,5 +29,5 @@ class Joystick:
         return sel
 
 if __name__ == '__main__':
-    joy = Joystick()
+    joy = Joystick('/dev/ttyACM1')
     #print joy.getCoords()
